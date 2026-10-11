@@ -2,7 +2,7 @@
 
 A single-user intraday crypto desk that connects sentiment research, technical analysis, paper trading, and strategy testing. Open the site directly into the workspace—no account or wallet is required.
 
-**The included static export is usable immediately with clearly labeled synthetic data.** External sources and real exchange orders require the optional private Python service and your own configuration. No credentials are included in the source or export.
+**The private Python service renders the workspace through Jinja2, with an optional static demo in `dist/`.** The demo is usable immediately with clearly labeled synthetic data. External sources and real exchange orders require the private service and your own configuration. No credentials are included in the source or export.
 
 ## Install, preview, and rebuild
 
@@ -62,7 +62,7 @@ The index uses **50% social, 30% news, and 20% on-chain**. Missing sources are e
 - **Suggested paper stop:** Twice the average high–low range over the last 14 bars, constrained to a 0.5–10% distance. This is a simple volatility heuristic, not ATR or a guaranteed loss limit.
 - **Position sizing:** Risk budget divided by entry-to-stop distance, capped by cash with a 0.1% entry-fee allowance. Displayed price risk excludes fees, gaps, and slippage.
 
-The chart's sentiment line has an independent normalized 0–100 scale; it is not a price series. The candle table exposes exact values. Live historical sentiment is shown only where the service actually recorded observations; today's score is never backfilled over past candles.
+The chart's sentiment line has an independent normalized 0–100 scale; it is not a price series. Recorded observations form separate runs across missing history; isolated observations remain visible as points. When the selected overlay has no observations in view, its indicator says so. Tooltips and the candle table expose full UTC dates and exact values; multi-day axes include day/month labels. Live historical sentiment is shown only where the service actually recorded observations; today's score is never backfilled over past candles.
 
 ## Historical analysis
 
@@ -80,7 +80,7 @@ Use ascending epoch **milliseconds**, valid OHLC prices, nonnegative volume, and
 
 ## Run the private service
 
-The architecture follows the reference [Jev-X Sentiment Analysis repository](https://github.com/brainstormity/Jev-X-Sentiment-Analysis): Python, FastAPI, SQLite, CCXT, HTTPX, TwitterAPI.io, and TypeSafe's Jev SDK. The browser remains native JavaScript/CSS, authored in TypeScript and built with Vite to satisfy static-export and typechecking requirements. FastAPI serves the same `dist/` export instead of rendering Jinja templates. No React, wallet connection, external font CDN, or runtime charting dependency is required.
+The architecture follows the reference [Jev-X Sentiment Analysis repository](https://github.com/brainstormity/Jev-X-Sentiment-Analysis): Python, FastAPI, **Jinja2 templates, Pydantic Settings with python-dotenv**, SQLite, CCXT, HTTPX, TwitterAPI.io, and TypeSafe's Jev SDK. FastAPI renders `service/templates/index.html` with `Jinja2Templates` and `TemplateResponse`. It reads `dist/build-manifest.json` to select the current hashed JavaScript/CSS assets. The existing browser interface remains native JavaScript/CSS, authored in TypeScript and built with Vite. The same build produces the independent static demo in `dist/index.html`. No React, wallet connection, external font CDN, or runtime charting dependency is required.
 
 Use Python 3.12 on Linux for the supplied dependency lock. On another platform, install from `requirements.txt` and resolve compatible platform packages; `requirements-lock.txt` records the exact validated Linux environment.
 
@@ -92,7 +92,9 @@ export SENTRA_ADMIN_TOKEN="$(python3 -c 'import secrets; print(secrets.token_url
 uvicorn service.main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-Use the generated token and `http://127.0.0.1:8000` in **Connections**. The token must contain at least 32 characters; there is no default token. It stays in the browser tab's memory and is discarded on reload. The service also serves the built site at its root. Configure the variables below in your shell or process manager, then restart the service. No `.env` file is required.
+Use the generated token and `http://127.0.0.1:8000` in **Connections**. The token must contain at least 32 characters; there is no default token. It stays in the browser tab's memory and is discarded on reload. The service renders the workspace at its root. Keep `service/templates/` and the complete `dist/` directory together on the private host, including `build-manifest.json`; run `npm run build` after frontend changes. The manifest is a runtime dependency for Jinja rendering, not a disposable cache. A missing manifest produces a clear HTTP 503 build instruction.
+
+Configure the variables below in your shell/process manager or an optional private `.env` in the directory from which you launch the service, then restart it. Pydantic Settings parses the UTF-8 dotenv file through python-dotenv. Explicit Python configuration values take precedence over process environment, which takes precedence over dotenv, then defaults. Existing variable names and comma-separated `ALLOWED_ORIGINS` are preserved. Invalid typed settings fail early; a short token or unsafe live-trading configuration prevents startup. The dotenv file is optional, must remain private, and must never be added to the static export or source control.
 
 | Variable | Meaning / default |
 | --- | --- |
@@ -138,7 +140,9 @@ The configured ntfy topic receives **service-side live signal, live order, and a
 - `src/core.ts`: types, deterministic sample data, indicators, signal matching, paper ledger, risk sizing, CSV parsing, and backtesting.
 - `src/chart.ts`: native SVG candles, overlays, inspection, sparklines, and equity curve.
 - `service/providers.py`: provider adapters, source scoring, real observations, and snapshot cache.
-- `service/main.py`: authenticated API, order preflight/idempotency, and live automation.
+- `service/main.py`: Jinja workspace route, authenticated API, order preflight/idempotency, and live automation.
+- `service/config.py`: Pydantic settings, environment aliases, dotenv loading, and startup guards.
+- `service/templates/index.html`: service HTML shell and metadata. Keep metadata consistent with the static shell in root `index.html`; both use the same compiled interface. `vite.config.ts` enables the relative static export and build manifest.
 - `service/database.py`: SQLite observations, sentiment history, orders, and strategy state.
 
 To add a market, extend `Asset`/`ASSETS`, names/sample fixtures, and the service's `Asset`/provider maps together; verify pair support on your exchange. To add an indicator or strategy rule, keep its calculation in `core.ts` and test the timing and fill assumptions before exposing it in a form. Never put a provider or exchange secret in `src/`, `public/`, or a Vite-prefixed environment variable.
@@ -153,15 +157,17 @@ pip install -r requirements-dev.txt
 python -m pytest tests/test_service.py -q -p no:cacheprovider
 npx playwright install chromium
 npm run test:browser
+node tests/revision-browser.mjs
+node tests/service-browser.mjs
 ```
 
-The worker ran the production build and strict TypeScript check successfully, **16 calculation/ledger tests**, **13 offline service tests**, and a browser interaction suite. The suite checks production assets under a subpath, multiple widths, dialogs/keyboard, signals, paper trading, chart controls, feed filters, CSVs, risk sizing, notifications, private API contracts, and all seven pages with axe. Final counts and evidence are in [artifacts/validation.md](artifacts/validation.md) and [artifacts/browser-results.json](artifacts/browser-results.json).
+The revision worker ran the production build and strict TypeScript check successfully, **16 calculation/ledger tests**, **16 service tests**, **19 existing browser scenarios**, and the targeted revision and Jinja-service browser checks. Service tests cover dotenv parsing and precedence, typed validation, the actual Jinja response, subpath asset URLs, and unchanged API authorization/execution guards. All seven pages report zero axe violations. Before/after evidence, viewport coverage, and exact outcomes are recorded in [artifacts/validation.md](artifacts/validation.md), [artifacts/revision-after.json](artifacts/revision-after.json), and [artifacts/service-browser-results.json](artifacts/service-browser-results.json).
 
-This machine blocks sockets from independently launched Chromium processes (`ERR_ACCESS_DENIED`). The automated suite therefore used the explicit `SENTRA_BROWSER_TRANSPORT=node` test option: Node fetches the bytes from the bounded local HTTP server and fulfills browser requests. The supplied browser tool separately opened and interacted with the real production export over ordinary HTTP and was used for rendered review. Service-worker behavior is not established by the routed automated suite.
+Chromium 156.0.8078.4 loaded the production export at `/preview/` and the Jinja service at its root over ordinary HTTP. No Node transport workaround was needed in this revision. The Jinja-served UI created a signal and a paper order, and its root-scoped notification worker activated. The supplied browser connector could not launch its expected browser; locally installed Playwright provided the rendered inspection and screenshots instead.
 
-Worker frontend dependencies were installed outside the repository at `/tmp/sentra-tools`, with its executable directory added to `PATH` and `NODE_PATH` set for the test runner; no repository `node_modules/` was created. Python dependencies were also isolated under `/tmp`. Normal installations use the commands above. Nothing depends on these worker-specific paths at runtime.
+Worker frontend dependencies were installed outside the repository at `/tmp/sentra-revision-js`, with its executable directory added to `PATH` and `NODE_PATH` set for the test runners. Python dependencies and browser binaries were also isolated under `/tmp`; no repository dependency directory was created. Normal installations use the commands above. Nothing depends on these worker-specific paths at runtime. `tests/service-browser.mjs` uses the active `python3`, or `SENTRA_PYTHON` when set, and removes its temporary database after stopping its test server.
 
-Limitations: paid Twitter/Jev providers, authenticated exchange trading, and actual mobile/desktop notification delivery were not exercised with owner credentials. A read-only Kraken + Ethereum RPC integration check succeeded. Native screen-reader sessions, physical mobile devices, Safari/Firefox, and browser-native 200% zoom were not tested. Use one active browser tab; local paper state has no multi-tab locking. No live funds were traded and no site was publicly deployed during validation.
+Limitations: paid Twitter/Jev providers, authenticated exchange trading, and actual mobile/desktop notification delivery were not exercised with owner credentials. The prior round's read-only provider checks were not repeated for this rendering/configuration revision. Native screen-reader sessions, physical mobile devices, Safari/Firefox, and browser-native 200% zoom were not tested. Use one active browser tab; local paper state has no multi-tab locking. No live funds were traded and no site was publicly deployed during validation.
 
 ## Attribution and submission budget
 

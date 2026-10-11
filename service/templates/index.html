@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101214" />
+    <title>{{ app_title }}</title>
+    <meta name="description" content="A personal crypto trading desk. Connect sentiment, technical analysis, paper execution, and strategy backtesting in one focused workspace." />
+    <meta property="og:title" content="{{ app_title }}" />
+    <meta property="og:description" content="A clearer view of the market. Sentiment, signals, and execution in one personal workspace." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="{{ url_for('public_file', filename='social-card.png') }}" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('public_file', filename='favicon.svg') }}" />
+    <link rel="manifest" href="{{ url_for('public_file', filename='manifest.webmanifest') }}" />
+    {% for stylesheet in entry.css %}
+    <link rel="stylesheet" crossorigin href="{{ url_for('assets', path=stylesheet.removeprefix('assets/')) }}" />
+    {% endfor %}
+    <script type="module" crossorigin src="{{ url_for('assets', path=entry.file.removeprefix('assets/')) }}"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to workspace</a>
+    <div id="app"></div>
+    <div id="modal-root"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

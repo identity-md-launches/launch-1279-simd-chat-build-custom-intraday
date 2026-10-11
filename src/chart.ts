@@ -9,6 +9,8 @@ export interface ChartOptions {
   zoom: number;
 }
 const price = (n: number) => number(n, n > 1000 ? 0 : 2);
+export const candleTime = (time: number) =>
+  `${new Date(time).toISOString().slice(0, 16).replace("T", " ")} UTC`;
 const linePath = (
   values: number[],
   x: (i: number) => number,
@@ -23,13 +25,15 @@ export function renderChart(
   options: ChartOptions,
 ) {
   const bars = all.slice(-options.zoom),
+    multiDay = new Date(bars[0].time).toISOString().slice(0, 10) !==
+      new Date(bars.at(-1)!.time).toISOString().slice(0, 10),
     width = Math.max(260, host.clientWidth),
     small = width < 500,
     height = small ? 285 : 300;
   const right = small ? 55 : 67,
     left = 10,
     top = 15,
-    bottom = 27,
+    bottom = multiDay ? 43 : 27,
     plotW = width - right - left,
     plotH = height - bottom - top;
   const lows = bars.map((c) => c.low),
@@ -67,21 +71,32 @@ export function renderChart(
         )
         .join("");
   const vwaps = vwap(all).slice(-bars.length),
-    hasSentiment = bars.every((c) => c.sentiment !== null);
+    hasSentiment = bars.some((c) => c.sentiment !== null),
+    sentimentY = (n: number) => height - bottom - 35 - (n / 100) * plotH * 0.65;
+  const runs: number[][] = [];
+  bars.forEach((c, i) => {
+    if (c.sentiment === null) return;
+    if (i === 0 || bars[i - 1].sentiment === null) runs.push([]);
+    runs.at(-1)!.push(i);
+  });
   const overlays =
     (options.vwap
       ? `<path class="vwap-line" d="${linePath(vwaps, x, y)}"/>`
       : "") +
     (options.sentiment && hasSentiment
-      ? `<path class="sentiment-line" d="${linePath(
-          bars.map((c) => c.sentiment!),
-          x,
-          (n) => height - bottom - 35 - (n / 100) * plotH * 0.65,
-        )}"/>`
+      ? runs.map((run) => run.length === 1
+          ? `<circle class="sentiment-point" cx="${x(run[0])}" cy="${sentimentY(bars[run[0]].sentiment!)}" r="2.5"/>`
+          : `<path class="sentiment-line" d="${linePath(
+              run.map((i) => bars[i].sentiment!),
+              (i) => x(run[i]), sentimentY,
+            )}"/>`).join("")
       : "");
   const labels = Array.from({ length: small ? 3 : 6 }, (_, i) => {
-    const index = Math.round((i / (small ? 2 : 5)) * (bars.length - 1));
-    return `<text class="chart-axis" x="${x(index)}" y="${height - 6}" text-anchor="${i === 0 ? "start" : "middle"}">${new Date(bars[index].time).toISOString().slice(11, 16)}</text>`;
+    const index = Math.round((i / (small ? 2 : 5)) * (bars.length - 1)),
+      date = new Date(bars[index].time),
+      clock = date.toISOString().slice(11, 16),
+      day = date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", timeZone: "UTC" });
+    return `<text class="chart-axis" x="${x(index)}" y="${height - (multiDay ? 21 : 6)}" text-anchor="${i === 0 ? "start" : i === (small ? 2 : 5) ? "end" : "middle"}">${multiDay ? `${day}<tspan x="${x(index)}" dy="15">${clock}</tspan>` : clock}</text>`;
   }).join("");
   const last = bars.at(-1)!,
     latestY = y(last.close);
@@ -92,7 +107,7 @@ export function renderChart(
     const c = bars[index];
     const tooltip = host.querySelector<HTMLElement>("#chart-tooltip")!;
     tooltip.hidden = false;
-    tooltip.innerHTML = `<strong>${new Date(c.time).toISOString().slice(11, 16)} UTC</strong><span>O ${price(c.open)} · H ${price(c.high)}</span><span>L ${price(c.low)} · C ${price(c.close)}</span><span>Volume ${number(c.volume)} · Sentiment ${c.sentiment ?? "unavailable"}</span>`;
+    tooltip.innerHTML = `<strong>${candleTime(c.time)}</strong><span>O ${price(c.open)} · H ${price(c.high)}</span><span>L ${price(c.low)} · C ${price(c.close)}</span><span>Volume ${number(c.volume)} · Sentiment ${c.sentiment ?? "unavailable"}</span>`;
     tooltip.style.insetInlineStart = `${Math.min(Math.max(8, x(index) - 85), Math.max(8, width - 225))}px`;
     const crosshair = host.querySelector("#crosshair")!;
     crosshair.setAttribute("visibility", "visible");

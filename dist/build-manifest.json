@@ -1,0 +1,18 @@
+{
+  "index.html": {
+    "file": "assets/index-BJw8r7pl.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "css": [
+      "assets/index-eXLwsXzF.css"
+    ],
+    "assets": [
+      "assets/inter-latin-Dx4kXJAl.woff2"
+    ]
+  },
+  "src/assets/inter-latin.woff2": {
+    "file": "assets/inter-latin-Dx4kXJAl.woff2",
+    "src": "src/assets/inter-latin.woff2"
+  }
+}

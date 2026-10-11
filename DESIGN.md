@@ -4,7 +4,7 @@
 
 Sentra is a personal crypto research and trading desk. The implemented direction is a restrained dark interface: graphite surfaces, a lime primary action, mint positive data, rose negative data, and compact numeric typography. There is no marketing hero. The overview opens with the product workspace, **Create signal**, four summary metrics, an interactive chart and sentiment index, followed by source observations, signals, and positions.
 
-The shared shell, forms, buttons, panels, source rows, and tables support all seven views. The overview's chart/index arrangement is specific to that page; the strategy lab and settings use layouts suited to their tasks. Source of truth: `src/style.css`, `src/main.ts`, `src/chart.ts`, and `src/icons.ts`.
+The shared shell, forms, buttons, panels, source rows, and tables support all seven views. The overview's chart/index arrangement is specific to that page; the strategy lab and settings use layouts suited to their tasks. Source of truth: `src/style.css`, `src/main.ts`, `src/chart.ts`, and `src/icons.ts`. The private service renders `service/templates/index.html` through Jinja2 with the same built interface assets as the static demo; this adds no alternate visual theme. Task subtitles describe the tools available on each page. The sidebar contains navigation and profile controls without a promotional note.
 
 ## Colors
 
@@ -28,7 +28,7 @@ Canonical values are hexadecimal. Primitive neutral/status values are declared i
 | `--warning` | `#ddc27a` | Neutral sentiment, sample indicator, VWAP series |
 | `--sentiment` | `#ac9be9` | Sentiment/RSI chart series and on-chain source identity |
 
-`#182013` is the dark label on primary buttons. The orange Bitcoin, blue Ethereum, and purple Solana coin symbols are asset identifiers, not action colors. Chart grids use `#2b3033`; their separators are decorative. Volume bars composite the positive/negative colors over the chart surface at 0.65 opacity. Sentiment is dashed, VWAP solid, and series have named toggles; color is not the only identifier.
+`#182013` is the dark label on primary buttons. The orange Bitcoin, blue Ethereum, and purple Solana coin symbols are asset identifiers, not action colors. Chart grids use `#2b3033`; their separators are decorative. Volume bars composite the positive/negative colors over the chart surface at 0.65 opacity. Sentiment runs are dashed and isolated observations use 2.5 px radius points, both with `--sentiment` at 0.85 opacity. VWAP is solid, and series have named toggles; color is not the only identifier.
 
 Measured rendered contrasts and the volume-bar correction are recorded in `artifacts/contrast-measurements.json` and `artifacts/validation.md`. The implementation has one deliberate dark theme; no light-mode variant is claimed.
 
@@ -59,7 +59,7 @@ Shared spacing follows 4, 8, 12, 16, 20, 24, and 32 px steps, with explicit comp
 - Main area: 30 px padding, fluid width, maximum 1,720 px. Page headings pair title/description with a single emphasized action.
 - Metrics: four equal minimum-zero columns with 16 px gaps. Desk content uses approximately 2.23:1 chart/index columns and a 20 px gap. Panels and grid children use `min-width: 0` where content needs to shrink.
 - The strategy lab uses a 325 px parameter column and a flexible results column. Connections uses two equal panels. Settings has a 950 px reading width.
-- Tables preserve their real column structure inside focusable horizontal scrollers. `.table-wrap` is positioned, so offscreen assistive labels remain inside the scroll region rather than widening the page. Long backtest logs also scroll vertically, with sticky headers. The chart toolbar wraps its two control groups when space is limited.
+- Tables preserve their real column structure inside focusable horizontal scrollers. `.table-wrap` is positioned, so offscreen assistive labels remain inside the scroll region rather than widening the page. Long backtest logs also scroll vertically, with sticky headers. The chart toolbar wraps its two control groups when space is limited. Below 650 px, `.portfolio-toolbar` also wraps with a 12 px row gap, letting Export CSV move below the position/history tabs without clipping its label or hit area.
 
 Implemented breakpoints:
 
@@ -93,8 +93,8 @@ Panels and metric cards use the 10 px `--radius` token. Buttons are 7 px, fields
 | `button()` / `.button` | Neutral default, `.primary` for the main action, `.compact` for dense areas, `.danger` for explicit consequential confirmation. Action helpers use `type="button"`; form submit controls are explicit. Disabled/busy states are native. |
 | `input()` / `.field` | Persistent labels, semantic native input types, validation limits, and visible control borders. `.form-grid` groups related fields; `.check-field` gives checkboxes a shared label target. Errors use adjacent alert regions. |
 | `.panel`, `.panel-heading`, `.metric-card` | Shared grouping and reading edges. Metrics have stable numeric styling and contextual source labels. |
-| `chartPanel()` + `renderChart()` in `src/chart.ts` | Native SVG candles and overlays, named pressed-state toggles, pointer/keyboard inspection, visible tooltip, and an accessible candle data table. RSI/MACD appear as subordinate plots. |
-| `signalCard()` | Asset, named rule, threshold explanation, textual monitoring status, and edit/pause controls. Paper execution is explicitly labeled. |
+| `chartPanel()` + `renderChart()` in `src/chart.ts` | Native SVG candles and overlays, named pressed-state toggles, pointer/keyboard inspection, visible tooltip, and an accessible candle data table. RSI/MACD appear as subordinate plots. Null sentiment splits runs without connecting across gaps; isolated samples are visible dots. A selected overlay with no observations in view shows “No recorded sentiment in this range” beside its toggle. Tooltips/table cells use `YYYY-MM-DD HH:mm UTC`. Multi-day axes use day/month above time and a 43 px bottom inset; single-day axes retain time labels and 27 px. |
+| `signalCard()` | Asset, named rule, full condition summary, textual monitoring status, and edit/pause controls. Compact and full variants both show sentiment and maximum RSI, followed by the optional VWAP filter. Summary text wraps normally at 12 px/1.5 with long-word wrapping. Paper execution is explicitly labeled. |
 | `feedPanel()` | Source filtering/search, full-text detail dialog, score label, and a recoverable no-results state. Provider text is escaped before rendering. |
 | `openModal()` | Native `<dialog>`, labeled title, explicit keyboard cycling, Escape close, and focus return. Long forms scroll within viewport bounds. Order review is distinct from order submission. |
 | `toast()` / `notify()` | Persistent dismissible polite status messages and an alert inbox. Important errors/actions do not disappear on a timer. |

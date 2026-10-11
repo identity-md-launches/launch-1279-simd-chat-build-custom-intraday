@@ -1,0 +1,193 @@
+{
+  "browser": "156.0.8078.4",
+  "transport": "native",
+  "observations": {
+    "compact signal discloses RSI and VWAP": {
+      "actual": "₿\nBTC / USDT\nWatching\nReview: hidden RSI\n\nSentiment ≥ 0 · RSI ≤ 0 · Price above VWAP\n\nAlert only",
+      "passed": true
+    },
+    "full signal discloses RSI and VWAP": {
+      "actual": "₿\nBTC / USDT\nWatching\nReview: hidden RSI\n\nSentiment ≥ 0 · RSI ≤ 0 · Price above VWAP\n\nAlert only\nPause\nEdit signal",
+      "passed": true
+    },
+    "RSI setting persists with VWAP enabled": {
+      "actual": {
+        "rsi": "0",
+        "vwap": true
+      },
+      "passed": true
+    },
+    "portfolio export fits its panel at 320px": {
+      "actual": {
+        "clippedPixels": 0,
+        "width": 114,
+        "height": 32,
+        "label": "Export CSV"
+      },
+      "passed": true
+    },
+    "portfolio export downloads": {
+      "actual": "sentra-paper-trades.csv",
+      "passed": true
+    },
+    "multi-day axis includes dates": {
+      "actual": [
+        "66,961",
+        "67,252",
+        "67,542",
+        "67,833",
+        "68,124",
+        "07 Oct18:30",
+        "08 Oct14:30",
+        "09 Oct06:30",
+        "10 Oct02:30",
+        "10 Oct18:30",
+        "11 Oct14:30"
+      ],
+      "passed": true
+    },
+    "tooltip has full UTC timestamp": {
+      "actual": "2026-10-11 10:30 UTC",
+      "passed": true
+    },
+    "table has full UTC timestamps": {
+      "actual": [
+        "2026-10-11 14:30 UTC",
+        "2026-10-11 10:30 UTC",
+        "2026-10-11 06:30 UTC",
+        "2026-10-11 02:30 UTC",
+        "2026-10-10 22:30 UTC",
+        "2026-10-10 18:30 UTC",
+        "2026-10-10 14:30 UTC",
+        "2026-10-10 10:30 UTC",
+        "2026-10-10 06:30 UTC",
+        "2026-10-10 02:30 UTC",
+        "2026-10-09 22:30 UTC",
+        "2026-10-09 18:30 UTC",
+        "2026-10-09 14:30 UTC",
+        "2026-10-09 10:30 UTC",
+        "2026-10-09 06:30 UTC"
+      ],
+      "passed": true
+    },
+    "single-day axis keeps clock labels": {
+      "actual": [
+        "66,961",
+        "67,252",
+        "67,542",
+        "67,833",
+        "68,124",
+        "12:35",
+        "13:00",
+        "13:20",
+        "13:45",
+        "14:05",
+        "14:30"
+      ],
+      "passed": true
+    },
+    "overview task guidance": {
+      "actual": "Monitor prices, sentiment, signals, and paper positions.",
+      "passed": true
+    },
+    "signals task guidance": {
+      "actual": "Set sentiment thresholds, RSI limits, and execution rules.",
+      "passed": true
+    },
+    "backtesting task guidance": {
+      "actual": "Test sentiment and technical rules against historical candles.",
+      "passed": true
+    },
+    "portfolio task guidance": {
+      "actual": "Review paper positions, fills, and position sizes.",
+      "passed": true
+    },
+    "connections task guidance": {
+      "actual": "Connect your private data and exchange service.",
+      "passed": true
+    },
+    "settings task guidance": {
+      "actual": "Manage notifications, refresh, and local data.",
+      "passed": true
+    },
+    "sidebar slogan removed": {
+      "actual": 0,
+      "passed": true
+    },
+    "sparse history displays the ten observations": {
+      "actual": {
+        "paths": [
+          "M244.18,102.24 L248.48,100.76 L252.77,105.19 L257.07,103.72 L261.37,102.24 L265.66,100.76 L269.96,105.19 L274.26,103.72 L278.55,102.24 L282.85,100.76"
+        ],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, sentiment, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "sparse fixture preserves missing table values": {
+      "actual": [
+        "72",
+        "71",
+        "70",
+        "69",
+        "72",
+        "71",
+        "70",
+        "69",
+        "72",
+        "71",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "passed": true
+    },
+    "gaps split runs and isolated observations stay visible": {
+      "actual": {
+        "paths": [
+          "M218.40,105.19 L222.70,103.72 L226.99,102.24",
+          "M257.07,103.72 L261.37,102.24"
+        ],
+        "points": 1,
+        "label": "64 price candles with VWAP, volume, sentiment, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "empty history has no sentiment geometry": {
+      "actual": {
+        "paths": [],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "empty selected indicator explains missing history": {
+      "actual": "VWAP\nSentiment\nNo recorded sentiment in this range\nVolume\nRSI\nMACD",
+      "passed": true
+    },
+    "disabled overlay hides empty message": {
+      "actual": "VWAP\nSentiment\nVolume\nRSI\nMACD",
+      "passed": true
+    },
+    "full history remains one continuous overlay": {
+      "actual": {
+        "paths": [
+          "M12.15,105.19 L16.45,103.72 L20.74,102.24 L25.04,100.76 L29.34,105.19 L33.63,103.72 L37.93,102.24 L42.23,100.76 L46.52,105.19 L50.82,103.72 L55.12,102.24 L59.41,100.76 L63.71,105.19 L68.01,103.72 L72.30,102.24 L76.60,100.76 L80.90,105.19 L85.20,103.72 L89.49,102.24 L93.79,100.76 L98.09,105.19 L102.38,103.72 L106.68,102.24 L110.98,100.76 L115.27,105.19 L119.57,103.72 L123.87,102.24 L128.16,100.76 L132.46,105.19 L136.76,103.72 L141.05,102.24 L145.35,100.76 L149.65,105.19 L153.95,103.72 L158.24,102.24 L162.54,100.76 L166.84,105.19 L171.13,103.72 L175.43,102.24 L179.73,100.76 L184.02,105.19 L188.32,103.72 L192.62,102.24 L196.91,100.76 L201.21,105.19 L205.51,103.72 L209.80,102.24 L214.10,100.76 L218.40,105.19 L222.70,103.72 L226.99,102.24 L231.29,100.76 L235.59,105.19 L239.88,103.72 L244.18,102.24 L248.48,100.76 L252.77,105.19 L257.07,103.72 L261.37,102.24 L265.66,100.76 L269.96,105.19 L274.26,103.72 L278.55,102.24 L282.85,100.76"
+        ],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, sentiment, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "browser has no runtime errors": {
+      "actual": [],
+      "passed": true
+    },
+    "production resources load": {
+      "actual": [],
+      "passed": true
+    }
+  }
+}

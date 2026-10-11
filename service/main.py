@@ -13,10 +13,11 @@ from uuid import UUID, uuid4
 
 import ccxt.async_support as ccxt
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
 
 from .config import Config
@@ -212,7 +213,7 @@ def create_app(config=None, exchange_factory=None):
 
     @asynccontextmanager
     async def lifespan(app):
-        config.validate()
+        config.validate_startup()
         db = Database(config.db_path)
         options = {'enableRateLimit': True, 'timeout': 20000, 'apiKey': config.api_key, 'secret': config.secret, 'password': config.password, 'options': {'defaultType': 'spot'}}
         exchange = exchange_factory(options) if exchange_factory else getattr(ccxt, config.exchange)(options)
@@ -312,8 +313,27 @@ def create_app(config=None, exchange_factory=None):
         return {'sent': True}
 
     dist = Path(__file__).resolve().parents[1] / 'dist'
-    if dist.exists():
-        app.mount('/', StaticFiles(directory=dist, html=True), name='web')
+    templates = Jinja2Templates(directory=Path(__file__).resolve().parent / 'templates')
+    app.mount('/assets', StaticFiles(directory=dist / 'assets', check_dir=False), name='assets')
+
+    @app.get('/', response_class=HTMLResponse)
+    async def workspace(request: Request):
+        try:
+            entry = json.loads((dist / 'build-manifest.json').read_text())['index.html']
+        except (OSError, ValueError, KeyError):
+            raise HTTPException(503, 'Build the interface with npm run build before opening the workspace.') from None
+        return templates.TemplateResponse(
+            request=request, name='index.html',
+            context={'app_title': 'Sentra — Your sentiment trading desk', 'entry': entry},
+        )
+
+    # Explicit public files keep the manifest/notification worker at the app root.
+    # No template, private settings, database, or source directory is exposed.
+    @app.get('/{filename}', include_in_schema=False)
+    async def public_file(filename: str):
+        if filename not in ('favicon.svg', 'social-card.png', 'manifest.webmanifest', 'sw.js'):
+            raise HTTPException(404)
+        return FileResponse(dist / filename)
     return app
 
 

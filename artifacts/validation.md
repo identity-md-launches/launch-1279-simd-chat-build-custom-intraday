@@ -1,6 +1,77 @@
 # Sentra implementation and validation
 
-Worker review, 11 October 2026. **Complete for the stated scope**, with the external-service and device limitations below. This report records checks performed by the worker; it is not an independent certification.
+## Revision review — 11 October 2026
+
+**Complete for the revision scope**, with the limitations below. This is the worker's own evidence, not an independent certification. All six reported findings reproduced before implementation and are answered as fixed in root `.imd-responses.json`. Existing trading calculations, provider adapters, visual tokens, navigation, and paper/live execution flows were retained.
+
+The upstream `requirements.txt`, `app/main.py`, and `app/core/config.py` were retrieved from `https://raw.githubusercontent.com/brainstormity/Jev-X-Sentiment-Analysis/main/`. They respectively declare Jinja2/Pydantic Settings/python-dotenv, use `Jinja2Templates`/`TemplateResponse`, and subclass `BaseSettings` with `env_file=".env"`. The revised service now uses those same layers. Its HTML shell selects the shared compiled interface via `dist/build-manifest.json`. `dist/index.html` remains a complete optional static demo. Environment names, typed configuration, secret handling, authorization, and existing live-execution guards are preserved; dotenv is optional and private.
+
+### Reproductions, fixes, and rechecks
+
+Frontend before/after observations are saved in `revision-before.json` and `revision-after.json`. The first file was captured against the original delivered export before source fixes. The latter contains **25 passing assertions** against the rebuilt export. Source locations below refer to the revised files.
+
+| Finding / severity | Source | Reproduction and result |
+| --- | --- | --- |
+| `eba9b4e…` · High · Stack fidelity | `service/main.py:316`, `service/config.py:9`, `service/templates/index.html:1` | Original service had a static root mount, dataclass/os.getenv settings, and none of the three reference dependencies. Added a real Jinja route, asset manifest, BaseSettings/dotenv layer, dependency declarations and exact locks. TestClient confirms an actual Jinja template response and asset loading under `/desk`, with authenticated APIs unchanged and settings absent from HTML. A separate Chromium test loads the running service over HTTP, creates a signal, fills a paper order, and observes notification-worker activation. |
+| `d6fb8eb6…` · Medium · Writing/data disclosure | `src/main.ts:483`, `src/style.css:1333` | At 390px a threshold-0, RSI-0, VWAP-enabled rule displayed Watching but omitted RSI from both card variants. Both now print sentiment, RSI, and optional VWAP, with wrapping. Same-rule UI assertions and edit persistence pass. |
+| `677eeeaef…` · Medium · Chart data | `src/chart.ts:73`, `src/main.ts:424`, `src/style.css:954` | With 170 null candles and ten observed candles, the old chart drew no sentiment path although the table held ten observations. It now renders one ten-point run, or multiple runs plus singleton points, without filling gaps. Tests also cover fully observed and empty ranges and toggling off the missing-history message. |
+| `9d8e207e…` · Medium · Layout | `src/main.ts:531`, `src/style.css:2688` | At 320×844 the original Export CSV button extended 18px beyond its panel. Measured before focus/scrollIntoView, which can scroll an overflow-hidden ancestor and conceal the issue. `.portfolio-toolbar` now wraps with a 12px row gap below 650px. Button remains 114×32px, with zero clipped pixels; clicking downloads the CSV. |
+| `3e0a1425…` · Medium · Typography/data identity | `src/chart.ts:12`, `src/chart.ts:94`, `src/main.ts:964` | The original 24-bar/4h range showed repeated clock times in the axis, keyboard tooltip, and table. Tooltip and all 15 table rows now include full UTC dates. Multi-day axes show day/month plus clock labels; a single-day control case retains clock-only labels. Rendered desktop and mobile charts were inspected. |
+| `243aa935…` · Medium · Writing | `src/main.ts:349`, `src/main.ts:408`, `src/main.ts:511` | Six reported subtitles and the sidebar slogan were present. Replaced those six subtitles with the requested task guidance and deleted the sidebar note and unused CSS. Six route assertions and an absent-note assertion pass. The live-price portfolio explanation and unrelated copy are preserved. |
+
+A packaging check found that the workspace ignores `.vite/`. The build manifest therefore uses the explicit filename `dist/build-manifest.json` instead of Vite's default cache-like directory. The manifest is included without changing any ignore file. No required runtime artifact was removed.
+
+### Better Interface: coverage of the final revision
+
+The pinned workflow, all six core domains, and design-documentation method were read and applied. The existing design system was preserved. `DESIGN.md` now documents the actual revised chart, signal summary, portfolio wrapping, copy, and Jinja shell.
+
+| Domain | Checked in this revision | Limits / not applicable |
+| --- | --- | --- |
+| Accessibility | Existing keyboard dialog/focus-return suite; keyboard candle inspection; named indicator pressed states; working CSV button; seven page axe scans with zero violations. Visible chart/toolbar focus outlines were inspected in screenshots. | No native screen reader, forced-colors pass, exhaustive focus-background audit, or physical-device session. Axe is not a compliance certification. |
+| Layout | Original 18px clipping measured and eliminated. Overview assertions at 320/390/768/1024/1440/1920; all seven views checked for page overflow at 320/390/768. First-screen product and Create signal verified at 390×844 in the export and Jinja service. Reviewed desktop/mobile overview, narrow portfolio, sparse/empty charts. | No browser-native 200% zoom or physical safe-area test. English-only scope; RTL/localization variants are not implemented. |
+| Writing | Replaced reported slogans; complete condition disclosure; explicit missing sentiment; unambiguous dates. Existing error recovery, sample/live labels, and execution confirmations remain covered by the original interaction suite. | No change to unrelated accepted copy. No live-market accuracy claim for synthetic or controlled data. |
+| Typography | Retained Inter and six-size scale; font loads; full condition summaries wrap; full timestamps fit the tooltip and remain accessible in the horizontal table scroller. Multi-day axes use two lines at the existing 12px size without overlap in inspected screenshots. | No native iOS focus-zoom, cross-OS typography, or text-enlargement test. |
+| Colors | Source token/opacity review, current screenshots, and axe text-contrast checks. New sentiment points reuse the existing sentiment token and 0.85 opacity; empty-range note uses the existing muted token. No color-token changes. | Prior measured ratios in `contrast-measurements.json` are retained as historical evidence, not newly measured ratios. Every possible overlapping chart mark was not contrast-tested. No light theme is implemented. |
+| UI details | Retained button/dialog states and paper/live distinctions. Tested sparse, isolated, full, empty, selected and deselected chart states, both signal card variants, and CSV download after toolbar wrapping. Existing refresh-draft preservation, error paths, and confirmations pass. | No animation timeline slow-motion review or OS-level reduced-motion test. Browser tests request reduced motion; source motion guards are unchanged. |
+
+### Commands and actual results
+
+Dependencies were installed in `/tmp/sentra-revision-js` and `/tmp/sentra-revision-py`, with browser binaries in `/tmp/sentra-browsers`. No repository `node_modules/`, cache, environment file, database, or Git metadata was written. The system lacked `ensurepip`, so pip was bootstrapped only into the temporary Python environment. These are worker setup details; normal install/publish steps remain in README.
+
+```sh
+PATH=/tmp/sentra-revision-js/node_modules/.bin:$PATH npm run typecheck
+PATH=/tmp/sentra-revision-js/node_modules/.bin:$PATH npm run build
+npm test
+PYTHONDONTWRITEBYTECODE=1 /tmp/sentra-revision-py/bin/python -m pytest tests/test_service.py -q -p no:cacheprovider
+/tmp/sentra-revision-py/bin/pip check
+NODE_PATH=/tmp/sentra-revision-js/node_modules PLAYWRIGHT_BROWSERS_PATH=/tmp/sentra-browsers npm run test:browser
+NODE_PATH=/tmp/sentra-revision-js/node_modules PLAYWRIGHT_BROWSERS_PATH=/tmp/sentra-browsers node tests/revision-browser.mjs
+NODE_PATH=/tmp/sentra-revision-js/node_modules PLAYWRIGHT_BROWSERS_PATH=/tmp/sentra-browsers SENTRA_PYTHON=/tmp/sentra-revision-py/bin/python node tests/service-browser.mjs
+```
+
+| Check | Actual result |
+| --- | --- |
+| Typecheck and production build | Exit 0. Vite 7.3.7, seven modules. Export: HTML 1.31 kB; JS 77.26 kB; CSS 48.08 kB; Inter 48.26 kB; build manifest 0.38 kB, plus existing public assets. Asset URLs in `dist/index.html` remain relative. |
+| Core calculations/ledger | Exit 0, **16/16**. Existing indicators, signal matching, risk sizing, paper cash/fees, backtest timing/stops and CSV checks. |
+| Service | Exit 0, **16/16**. All 13 previous API/execution/provider tests retained, plus dotenv precedence/typed validation/startup guards and Jinja rendering with subpath assets. `pip check`: no broken requirements. No real exchange orders or owner credentials. |
+| Existing browser suite | Exit 0, **19/19 scenarios**, **7/7 axe page scans with zero violations**, no unhandled JavaScript errors or failed local resources. `browser-results.json` records scenario names and native transport. |
+| Targeted revision browser checks | Exit 0, **25/25 assertions**. Reproduction fixtures, both summaries, clipped-control measurement, actual CSV download, UTC inspection, all six subtitles, and chart data states. `revision-after.json` contains observed values. |
+| Running Jinja service | Exit 0; seven checks in `service-browser-results.json`. Real HTTP, HTML/asset/font loading, authenticated health, signal creation, two-step paper order, root-scoped worker activation, and 390px first screen/reflow. The script starts/stops the service and removes its temporary database. |
+| Package integrity | Current candidate byte counts, manifest/asset references and path-budget results are in `package-check.json`. Read-only Git enumeration only; submission is collected by the assignment, with no commit/bundle written by the worker. |
+
+Chromium **156.0.8078.4** successfully opened ordinary local HTTP sockets in this revision; the earlier round's Node routing workaround was not used. The supplied browser connector failed to launch because its expected `/home/seat/.cache/ms-playwright/chromium-1246/...` executable was absent. A separately installed Playwright browser provided actual rendered screenshots and interactions. Browser checks were not substituted with source-only inspection. All test servers ran inside bounded foreground validation commands and were stopped afterward.
+
+### Current rendered evidence and limitations
+
+Viewed final screenshots: `desktop-overview.png`, `mobile-first-screen.png` (390×844), `revision-portfolio-320.png`, `revision-dated-chart.png`, `revision-sparse-chart.png`, `revision-empty-chart.png`, and `revision-service-mobile.png`. The sparse/empty images use controlled API fixtures and do not establish an external provider connection. The revised chart screenshots show the actual production SVG and current CSS. Earlier untouched native-browser and narrow-view artifacts remain prior-round evidence only.
+
+Paid Twitter/Jev access, owner RSS/RPC availability, authenticated exchange execution, OS notification delivery, public deployment, Safari/Firefox, physical devices, native screen readers, and native zoom remain unverified. No live funds were traded. Jinja serving and dotenv configuration were verified locally; the code still requires the owner's real settings for live operation. The previous round's read-only external provider check was not repeated. One active user/tab and one service worker process remain the documented operational scope.
+
+---
+
+## Prior round record — historical
+
+The following accepted record is preserved for continuity. Its old template substitution, dependency counts, bundle hashes, browser transport/tool observations, source line numbers, and native-browser evidence describe the **pre-revision** implementation and are superseded by the revision results above. Previously fixed unrelated behavior was retained. Some standard-suite screenshots were refreshed in this revision as noted above.
 
 ## Scope and implementation
 

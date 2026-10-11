@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "browser": "156.0.8078.4",
+  "transport": "native HTTP",
+  "checks": [
+    "Jinja root and current Vite assets",
+    "metadata and local font",
+    "authenticated health with live execution disabled",
+    "signal creation",
+    "paper order review and fill",
+    "root-scoped notification worker activates",
+    "390px first screen and reflow"
+  ],
+  "errors": [],
+  "failedResources": []
+}

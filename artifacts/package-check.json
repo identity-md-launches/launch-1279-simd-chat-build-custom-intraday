@@ -1,29 +1,31 @@
 {
   "status": "passed",
   "date": "2026-10-11",
-  "measurement": "Uncompressed candidate file bytes, including this report; read-only git file enumeration. No commit or bundle was written.",
-  "candidateFiles": 53,
+  "measurement": "Uncompressed candidate file bytes from read-only Git enumeration; required response sidecar counted separately. No commit or bundle was written.",
+  "candidateFiles": 65,
   "budgetBytes": 8388608,
-  "indexSha256": "354d29335b278447eb39efba6ba3b85db4ae45ab64b51020683a2afd24ea35f2",
+  "indexSha256": "2f7181b51252ad62d56d005d383113f1b3a2d8385ab65357a52aec85cda23446",
+  "buildManifest": "dist/build-manifest.json",
   "localAssetReferences": [
     "./favicon.svg",
     "./manifest.webmanifest",
-    "./assets/index-RnLeOYTv.js",
-    "./assets/index-Bl7zwuZT.css",
+    "./assets/index-BJw8r7pl.js",
+    "./assets/index-eXLwsXzF.css",
     "./social-card.png"
   ],
   "checks": [
     "relative HTML/CSS asset URLs resolve locally",
+    "build manifest and all referenced Jinja runtime assets included",
     "required metadata and outputs present",
     "package manifest matches lockfile",
-    "required evidence included by repository ignore rules",
-    "no dependency/cache directories in candidate paths",
-    "no environment file, dependency archive, database, symlink or submodule",
+    "six requested finding responses written to root sidecar",
+    "no dependency/cache directories, environment files, archives, databases, symlinks or submodules in candidate paths",
     "all explicit path budgets pass"
   ],
-  "uncompressedSubmissionBytes": 1704915,
-  "productionExportBytes": 208845,
-  "documentationAndEvidenceBytes": 1122421,
+  "uncompressedSubmissionBytes": 1936818,
+  "productionExportBytes": 209810,
+  "documentationAndEvidenceBytes": 1310358,
   "ignoreFileBytes": 509,
-  "sourceAndConfigurationBytes": 373140
+  "sourceAndConfigurationBytes": 416141,
+  "responseSidecarBytes": 4336
 }

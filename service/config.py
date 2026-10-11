@@ -1,57 +1,56 @@
-from dataclasses import dataclass
-import os
 import math
 from pathlib import Path
+from typing import Annotated
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
-@dataclass
-class Config:
-    token: str
-    exchange: str
-    api_key: str
-    secret: str
-    password: str
-    sandbox: bool
-    live: bool
-    max_order: float
-    daily_limit: float
-    twitter_key: str
-    typesafe_key: str
-    rss_url: str
-    rpc_url: str
-    ntfy_url: str
-    ntfy_token: str
-    origins: list[str]
-    db_path: Path
+class Config(BaseSettings):
+    """Private settings: explicit values > process environment > optional dotenv > defaults."""
+
+    model_config = SettingsConfigDict(
+        env_file='.env', env_file_encoding='utf-8', extra='ignore',
+        populate_by_name=True, hide_input_in_errors=True,
+    )
+
+    token: str = Field(default='', validation_alias='SENTRA_ADMIN_TOKEN', repr=False)
+    exchange: str = Field(default='kraken', validation_alias='SENTRA_EXCHANGE')
+    api_key: str = Field(default='', validation_alias='EXCHANGE_API_KEY', repr=False)
+    secret: str = Field(default='', validation_alias='EXCHANGE_API_SECRET', repr=False)
+    password: str = Field(default='', validation_alias='EXCHANGE_API_PASSPHRASE', repr=False)
+    sandbox: bool = Field(default=False, validation_alias='EXCHANGE_SANDBOX')
+    live: bool = Field(default=False, validation_alias='ENABLE_LIVE_TRADING')
+    max_order: float = Field(default=0, validation_alias='LIVE_MAX_ORDER_USD')
+    daily_limit: float = Field(default=0, validation_alias='LIVE_DAILY_BUY_LIMIT_USD')
+    twitter_key: str = Field(default='', validation_alias='TWITTER_API_KEY', repr=False)
+    typesafe_key: str = Field(default='', validation_alias='TYPESAFE_API_KEY', repr=False)
+    rss_url: str = Field(default='', validation_alias='NEWS_RSS_URL')
+    rpc_url: str = Field(default='', validation_alias='ETH_RPC_URL', repr=False)
+    ntfy_url: str = Field(default='', validation_alias='NTFY_TOPIC_URL', repr=False)
+    ntfy_token: str = Field(default='', validation_alias='NTFY_ACCESS_TOKEN', repr=False)
+    origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: [f'http://{host}:{port}' for port in (5173, 4173, 8000) for host in ('localhost', '127.0.0.1')],
+        validation_alias='ALLOWED_ORIGINS',
+    )
+    db_path: Path = Field(default=Path('runtime/sentra.sqlite3'), validation_alias='SENTRA_DB_PATH')
     poll_seconds: float = 60
 
+    @field_validator('origins', mode='before')
     @classmethod
-    def from_env(cls):
-        return cls(
-            token=os.getenv('SENTRA_ADMIN_TOKEN', ''),
-            exchange=os.getenv('SENTRA_EXCHANGE', 'kraken'),
-            api_key=os.getenv('EXCHANGE_API_KEY', ''),
-            secret=os.getenv('EXCHANGE_API_SECRET', ''),
-            password=os.getenv('EXCHANGE_API_PASSPHRASE', ''),
-            sandbox=os.getenv('EXCHANGE_SANDBOX', 'false').lower() == 'true',
-            live=os.getenv('ENABLE_LIVE_TRADING', 'false').lower() == 'true',
-            max_order=float(os.getenv('LIVE_MAX_ORDER_USD', '0')),
-            daily_limit=float(os.getenv('LIVE_DAILY_BUY_LIMIT_USD', '0')),
-            twitter_key=os.getenv('TWITTER_API_KEY', ''),
-            typesafe_key=os.getenv('TYPESAFE_API_KEY', ''),
-            rss_url=os.getenv('NEWS_RSS_URL', ''),
-            rpc_url=os.getenv('ETH_RPC_URL', ''),
-            ntfy_url=os.getenv('NTFY_TOPIC_URL', ''),
-            ntfy_token=os.getenv('NTFY_ACCESS_TOKEN', ''),
-            origins=[x.strip() for x in os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,http://localhost:8000,http://127.0.0.1:8000').split(',') if x.strip()],
-            db_path=Path(os.getenv('SENTRA_DB_PATH', 'runtime/sentra.sqlite3')),
-        )
+    def parse_origins(cls, value):
+        # Keep the existing comma-separated environment contract.
+        return [origin.strip() for origin in value.split(',') if origin.strip()] if isinstance(value, str) else value
+
+    @classmethod
+    def from_env(cls, **overrides):
+        return cls(**overrides)
 
     @property
     def live_ready(self):
         return bool(self.live and self.api_key and self.secret and 0 < self.max_order <= self.daily_limit)
 
-    def validate(self):
+    def validate_startup(self):
         if len(self.token) < 32:
             raise RuntimeError('Set SENTRA_ADMIN_TOKEN to a private token of at least 32 characters.')
         if self.exchange not in ('kraken', 'binance', 'coinbase'):

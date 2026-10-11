@@ -1,10 +1,13 @@
 import asyncio
-from dataclasses import replace
 import secrets
 import time
+from html.parser import HTMLParser
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
+from pydantic_settings import BaseSettings
 import pytest
 
 from service.config import Config
@@ -51,7 +54,7 @@ def config(tmp_path):
 def live_config(config, monkeypatch):
     # Replace readiness only inside offline tests; no stand-in credentials are delivered.
     monkeypatch.setattr(Config, 'live_ready', property(lambda self: self.live))
-    return replace(config, live=True)
+    return config.model_copy(update={'live': True})
 
 
 def auth(config):
@@ -69,6 +72,85 @@ def test_authentication_and_no_secret_in_health(config):
         assert response.status_code == 200
         assert response.json()['liveTrading'] is False
         assert config.token not in response.text
+
+
+def test_settings_load_dotenv_and_preserve_environment_precedence(tmp_path, monkeypatch):
+    # Dotenv parsing does not require an actual .env file or any owner secrets.
+    dotenv = tmp_path / 'settings.conf'
+    token = secrets.token_urlsafe(32)
+    dotenv.write_text(
+        f'SENTRA_ADMIN_TOKEN="{token}"\n'
+        'SENTRA_EXCHANGE=binance\nEXCHANGE_SANDBOX=true\n'
+        'LIVE_MAX_ORDER_USD=75.50\nLIVE_DAILY_BUY_LIMIT_USD=150\n'
+        'ALLOWED_ORIGINS="https://desk.example, http://localhost:8000, "\n'
+        'SENTRA_DB_PATH="private/desk.sqlite3"\nUNRELATED_VARIABLE=ignored\n'
+    )
+    for field in Config.model_fields.values():
+        if isinstance(field.validation_alias, str):
+            monkeypatch.delenv(field.validation_alias, raising=False)
+    cfg = Config.from_env(_env_file=dotenv)
+    assert isinstance(cfg, BaseSettings)
+    assert Config.model_config['env_file'] == '.env'
+    assert cfg.token == token and cfg.exchange == 'binance' and cfg.sandbox
+    assert cfg.max_order == 75.5 and cfg.daily_limit == 150
+    assert cfg.origins == ['https://desk.example', 'http://localhost:8000']
+    assert cfg.db_path == Path('private/desk.sqlite3')
+    assert not cfg.live_ready and not cfg.live
+    cfg.validate_startup()
+    monkeypatch.setenv('SENTRA_EXCHANGE', 'coinbase')
+    monkeypatch.setenv('EXCHANGE_SANDBOX', 'false')
+    assert Config.from_env(_env_file=dotenv).exchange == 'coinbase'
+    assert not Config.from_env(_env_file=dotenv).sandbox
+    assert Config.from_env(_env_file=dotenv, exchange='kraken').exchange == 'kraken'
+    assert token not in repr(cfg)
+
+
+def test_settings_reject_invalid_environment_and_keep_startup_guards(monkeypatch, config):
+    monkeypatch.setenv('LIVE_MAX_ORDER_USD', 'not-a-number')
+    with pytest.raises(ValidationError):
+        Config.from_env(_env_file=None)
+    monkeypatch.delenv('LIVE_MAX_ORDER_USD')
+    monkeypatch.setenv('ENABLE_LIVE_TRADING', 'not-a-boolean')
+    with pytest.raises(ValidationError):
+        Config.from_env(_env_file=None)
+    for update, message in [
+        ({'origins': ['*']}, 'ALLOWED_ORIGINS'),
+        ({'exchange': 'unsupported'}, 'SENTRA_EXCHANGE'),
+        ({'live': True}, 'Live trading needs'),
+    ]:
+        with pytest.raises(RuntimeError, match=message):
+            config.model_copy(update=update).validate_startup()
+
+
+def test_jinja_workspace_uses_built_assets_without_exposing_settings(config):
+    class AssetParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.urls = []
+        def handle_starttag(self, tag, attrs):
+            attrs = dict(attrs)
+            if tag in ('link', 'script'):
+                self.urls.append(attrs.get('href') or attrs.get('src'))
+
+    with TestClient(create_app(config, FakeExchange), root_path='/desk') as client:
+        response = client.get('/desk/')
+        assert response.status_code == 200
+        assert response.template.name == 'index.html'
+        assert response.context['app_title'] == 'Sentra — Your sentiment trading desk'
+        assert config.token not in response.text and '{{' not in response.text
+        assert '<div id="app"></div>' in response.text
+        parser = AssetParser()
+        parser.feed(response.text)
+        assert len(parser.urls) == 4
+        assert all('/desk/' in url for url in parser.urls)
+        for url in parser.urls:
+            assert client.get(url).status_code == 200
+        assert client.get('/desk/sw.js').status_code == 200
+        assert client.get('/desk/social-card.png').status_code == 200
+        assert client.get('/desk/service/config.py').status_code == 404
+        assert client.get('/desk/requirements.txt').status_code == 404
+        assert client.get('/desk/api/health').status_code == 401
+        assert client.get('/desk/api/health', headers=auth(config)).status_code == 200
 
 
 def test_snapshot_omits_missing_sources_and_unobserved_history(config):
@@ -160,7 +242,7 @@ def test_rss_and_social_polarity_is_bounded():
 
 def test_short_token_fails_before_server_starts(config):
     with pytest.raises(RuntimeError, match='SENTRA_ADMIN_TOKEN'):
-        with TestClient(create_app(replace(config, token=''), FakeExchange)):
+        with TestClient(create_app(config.model_copy(update={'token': ''}), FakeExchange)):
             pass
 
 

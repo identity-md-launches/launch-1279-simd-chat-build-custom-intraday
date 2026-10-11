@@ -1,0 +1,172 @@
+{
+  "browser": "156.0.8078.4",
+  "transport": "native",
+  "observations": {
+    "compact signal discloses RSI and VWAP": {
+      "actual": "₿\nBTC / USDT\nWatching\nReview: hidden RSI\n\nSentiment ≥ 0 · Price above VWAP\n\nAlert only",
+      "passed": false
+    },
+    "full signal discloses RSI and VWAP": {
+      "actual": "₿\nBTC / USDT\nWatching\nReview: hidden RSI\n\nSentiment ≥ 0 · Price above VWAP\n\nAlert only\nPause\nEdit signal",
+      "passed": false
+    },
+    "RSI setting persists with VWAP enabled": {
+      "actual": {
+        "rsi": "0",
+        "vwap": true
+      },
+      "passed": true
+    },
+    "portfolio export fits its panel at 320px": {
+      "actual": {
+        "clippedPixels": 18,
+        "width": 114,
+        "height": 32,
+        "label": "Export CSV"
+      },
+      "passed": false
+    },
+    "portfolio export downloads": {
+      "actual": "sentra-paper-trades.csv",
+      "passed": true
+    },
+    "multi-day axis includes dates": {
+      "actual": [
+        "66,961",
+        "67,252",
+        "67,542",
+        "67,833",
+        "68,124",
+        "18:30",
+        "14:30",
+        "06:30",
+        "02:30",
+        "18:30",
+        "14:30"
+      ],
+      "passed": false
+    },
+    "tooltip has full UTC timestamp": {
+      "actual": "10:30 UTC",
+      "passed": false
+    },
+    "table has full UTC timestamps": {
+      "actual": [
+        "14:30",
+        "10:30",
+        "06:30",
+        "02:30",
+        "22:30",
+        "18:30",
+        "14:30",
+        "10:30",
+        "06:30",
+        "02:30",
+        "22:30",
+        "18:30",
+        "14:30",
+        "10:30",
+        "06:30"
+      ],
+      "passed": false
+    },
+    "overview task guidance": {
+      "actual": "The market moves. Stay one signal ahead.",
+      "passed": false
+    },
+    "signals task guidance": {
+      "actual": "Your rules. The market’s next move.",
+      "passed": false
+    },
+    "backtesting task guidance": {
+      "actual": "Build a thesis. Test the numbers.",
+      "passed": false
+    },
+    "portfolio task guidance": {
+      "actual": "Practice your process. Keep track of every decision.",
+      "passed": false
+    },
+    "connections task guidance": {
+      "actual": "Your data. Your keys. Your personal trading desk.",
+      "passed": false
+    },
+    "settings task guidance": {
+      "actual": "A focused workspace, configured for you.",
+      "passed": false
+    },
+    "sidebar slogan removed": {
+      "actual": 1,
+      "passed": false
+    },
+    "sparse history displays the ten observations": {
+      "actual": {
+        "paths": [],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, overlays. Latest close $67,366.13."
+      },
+      "passed": false
+    },
+    "sparse fixture preserves missing table values": {
+      "actual": [
+        "72",
+        "71",
+        "70",
+        "69",
+        "72",
+        "71",
+        "70",
+        "69",
+        "72",
+        "71",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—"
+      ],
+      "passed": true
+    },
+    "gaps split runs and isolated observations stay visible": {
+      "actual": {
+        "paths": [],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, overlays. Latest close $67,366.13."
+      },
+      "passed": false
+    },
+    "empty history has no sentiment geometry": {
+      "actual": {
+        "paths": [],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "empty selected indicator explains missing history": {
+      "actual": "VWAP\nSentiment\nVolume\nRSI\nMACD",
+      "passed": false
+    },
+    "disabled overlay hides empty message": {
+      "actual": "VWAP\nSentiment\nVolume\nRSI\nMACD",
+      "passed": true
+    },
+    "full history remains one continuous overlay": {
+      "actual": {
+        "paths": [
+          "M12.15,114.01 L16.45,112.44 L20.74,110.86 L25.04,109.28 L29.34,114.01 L33.63,112.44 L37.93,110.86 L42.23,109.28 L46.52,114.01 L50.82,112.44 L55.12,110.86 L59.41,109.28 L63.71,114.01 L68.01,112.44 L72.30,110.86 L76.60,109.28 L80.90,114.01 L85.20,112.44 L89.49,110.86 L93.79,109.28 L98.09,114.01 L102.38,112.44 L106.68,110.86 L110.98,109.28 L115.27,114.01 L119.57,112.44 L123.87,110.86 L128.16,109.28 L132.46,114.01 L136.76,112.44 L141.05,110.86 L145.35,109.28 L149.65,114.01 L153.95,112.44 L158.24,110.86 L162.54,109.28 L166.84,114.01 L171.13,112.44 L175.43,110.86 L179.73,109.28 L184.02,114.01 L188.32,112.44 L192.62,110.86 L196.91,109.28 L201.21,114.01 L205.51,112.44 L209.80,110.86 L214.10,109.28 L218.40,114.01 L222.70,112.44 L226.99,110.86 L231.29,109.28 L235.59,114.01 L239.88,112.44 L244.18,110.86 L248.48,109.28 L252.77,114.01 L257.07,112.44 L261.37,110.86 L265.66,109.28 L269.96,114.01 L274.26,112.44 L278.55,110.86 L282.85,109.28"
+        ],
+        "points": 0,
+        "label": "64 price candles with VWAP, volume, sentiment, overlays. Latest close $67,366.13."
+      },
+      "passed": true
+    },
+    "browser has no runtime errors": {
+      "actual": [],
+      "passed": true
+    },
+    "production resources load": {
+      "actual": [],
+      "passed": true
+    }
+  }
+}

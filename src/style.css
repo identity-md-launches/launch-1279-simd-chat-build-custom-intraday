@@ -302,23 +302,6 @@ main:focus-visible {
 .sidebar-bottom {
   margin-block-start: auto;
 }
-.desk-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 24px 12px 34px;
-  font-size: var(--text-xs);
-  color: var(--muted);
-  line-height: 1.8;
-}
-.desk-note .icon {
-  color: var(--muted);
-  margin-top: 3px;
-}
-.desk-note strong {
-  color: var(--secondary);
-  font-weight: 400;
-}
 .profile {
   display: flex;
   align-items: center;
@@ -862,6 +845,11 @@ main {
   gap: 8px;
   padding: 3px 19px 9px;
 }
+.indicator-note {
+  align-self: center;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
 .indicator {
   display: inline-flex;
   align-items: center;
@@ -962,6 +950,10 @@ main {
   fill: none;
   stroke-width: 1.4;
   opacity: 0.9;
+}
+.sentiment-point {
+  fill: var(--sentiment);
+  opacity: 0.85;
 }
 .sentiment-line {
   stroke: var(--sentiment);
@@ -1339,6 +1331,8 @@ main {
   min-height: 32px;
 }
 .signal-card > p {
+  white-space: normal;
+  overflow-wrap: break-word;
   color: var(--muted);
   font-size: var(--text-xs);
   line-height: 1.5;
@@ -2413,9 +2407,6 @@ input::placeholder {
   .profile {
     gap: 8px;
   }
-  .desk-note {
-    margin-inline: 8px;
-  }
   .small-unit {
     max-width: 74px;
   }
@@ -2435,7 +2426,6 @@ input::placeholder {
   .brand > span,
   .workspace-label,
   .nav-link > span,
-  .sidebar-bottom .desk-note,
   .profile > div,
   .profile > .status-dot {
     display: none;
@@ -2695,6 +2685,10 @@ input::placeholder {
   }
 }
 @media (max-width: 650px) {
+  .portfolio-toolbar {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
   :root {
     font-size: 16px;
   }
@@ -2735,9 +2729,6 @@ input::placeholder {
   }
   .sidebar .profile {
     justify-content: flex-start;
-  }
-  .sidebar .desk-note {
-    display: flex;
   }
   .sidebar .profile > .status-dot {
     display: block;
