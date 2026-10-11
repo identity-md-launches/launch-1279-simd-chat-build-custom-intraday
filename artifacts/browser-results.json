@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "transport": "node",
+  "results": [
+    "Static export, metadata, local assets and typeface load under a subpath",
+    "Overview reflows at 320, 390, 768, 1024, 1440 and 1920 CSS pixels",
+    "At 390px the product name and primary action are on the first screen",
+    "Native dialog keyboard path, Escape and focus return",
+    "Create a rule, edit it, pause it and persist it",
+    "Cancel never submits a signal form",
+    "Paper automation executes once per trigger and disarms on reload",
+    "Paper order review, fees and closing a position update the portfolio",
+    "Risk sizing handles valid inputs and recoverable invalid stops",
+    "Trade export is a real CSV download",
+    "Chart controls change asset, timeframe, indicators and data table",
+    "Feed filtering, search, empty state and observation detail",
+    "Backtest runs, no-trade case is clear, CSV imports and results download",
+    "Notification event reaches the persistent alert inbox",
+    "Reset requires confirmation and clears paper positions",
+    "Connection errors retain honest sample labels; invalid service URLs are rejected",
+    "Live data, manual order confirmation and automation use the private API contract",
+    "Automatic refresh preserves calculator drafts and results",
+    "Every page passes the automated accessibility scan and mobile reflow check"
+  ],
+  "audits": [
+    {
+      "view": "overview",
+      "violations": []
+    },
+    {
+      "view": "markets",
+      "violations": []
+    },
+    {
+      "view": "signals",
+      "violations": []
+    },
+    {
+      "view": "backtesting",
+      "violations": []
+    },
+    {
+      "view": "portfolio",
+      "violations": []
+    },
+    {
+      "view": "connections",
+      "violations": []
+    },
+    {
+      "view": "settings",
+      "violations": []
+    }
+  ],
+  "consoleErrors": [],
+  "failedLocalResources": [],
+  "preview": "/preview/",
+  "browser": "155.0.8059.12"
+}

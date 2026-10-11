@@ -1,0 +1,51 @@
+[
+  {
+    "selector": ".metric-card .metric-label",
+    "foreground": "rgb(156, 166, 172)",
+    "background": "rgb(23, 26, 28)",
+    "opacity": 1,
+    "ratio": 7.05
+  },
+  {
+    "selector": ".metric-card .metric-value",
+    "foreground": "rgb(240, 243, 242)",
+    "background": "rgb(23, 26, 28)",
+    "opacity": 1,
+    "ratio": 15.66
+  },
+  {
+    "selector": ".button.primary",
+    "foreground": "rgb(24, 32, 19)",
+    "background": "rgb(195, 239, 115)",
+    "opacity": 1,
+    "ratio": 12.68
+  },
+  {
+    "selector": ".nav-link.selected",
+    "foreground": "rgb(195, 239, 115)",
+    "background": "rgb(37, 46, 27)",
+    "opacity": 1,
+    "ratio": 10.71
+  },
+  {
+    "selector": ".badge.positive",
+    "foreground": "rgb(101, 215, 170)",
+    "background": "rgb(25, 47, 40)",
+    "opacity": 1,
+    "ratio": 8.02
+  },
+  {
+    "selector": ".chart-volume.rise",
+    "foreground": "rgb(101, 215, 170)",
+    "background": "rgb(23, 26, 28)",
+    "opacity": 0.65,
+    "ratio": 4.87
+  },
+  {
+    "selector": ".chart-volume.fall",
+    "foreground": "rgb(237, 133, 139)",
+    "background": "rgb(23, 26, 28)",
+    "opacity": 0.65,
+    "ratio": 3.65
+  }
+]

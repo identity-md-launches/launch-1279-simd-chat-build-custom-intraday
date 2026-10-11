@@ -1,0 +1,35 @@
+{
+  "url": "/preview/",
+  "title": "Sentra — Your sentiment trading desk",
+  "fonts": [
+    {
+      "family": "Inter",
+      "status": "loaded"
+    }
+  ],
+  "serviceWorker": [
+    {
+      "scope": "http://127.0.0.1:4189/preview/",
+      "active": "activated"
+    }
+  ],
+  "notifications": "default",
+  "resources": [
+    {
+      "name": "http://127.0.0.1:4189/preview/assets/index-RnLeOYTv.js",
+      "bytes": 300
+    },
+    {
+      "name": "http://127.0.0.1:4189/preview/assets/index-Bl7zwuZT.css",
+      "bytes": 300
+    },
+    {
+      "name": "http://127.0.0.1:4189/preview/assets/inter-latin-Dx4kXJAl.woff2",
+      "bytes": 300
+    },
+    {
+      "name": "http://127.0.0.1:4189/preview/favicon.svg",
+      "bytes": 300
+    }
+  ]
+}

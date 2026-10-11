@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "date": "2026-10-11",
+  "measurement": "Uncompressed candidate file bytes, including this report; read-only git file enumeration. No commit or bundle was written.",
+  "candidateFiles": 53,
+  "budgetBytes": 8388608,
+  "indexSha256": "354d29335b278447eb39efba6ba3b85db4ae45ab64b51020683a2afd24ea35f2",
+  "localAssetReferences": [
+    "./favicon.svg",
+    "./manifest.webmanifest",
+    "./assets/index-RnLeOYTv.js",
+    "./assets/index-Bl7zwuZT.css",
+    "./social-card.png"
+  ],
+  "checks": [
+    "relative HTML/CSS asset URLs resolve locally",
+    "required metadata and outputs present",
+    "package manifest matches lockfile",
+    "required evidence included by repository ignore rules",
+    "no dependency/cache directories in candidate paths",
+    "no environment file, dependency archive, database, symlink or submodule",
+    "all explicit path budgets pass"
+  ],
+  "uncompressedSubmissionBytes": 1704915,
+  "productionExportBytes": 208845,
+  "documentationAndEvidenceBytes": 1122421,
+  "ignoreFileBytes": 509,
+  "sourceAndConfigurationBytes": 373140
+}

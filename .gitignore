@@ -1,0 +1,19 @@
+# Path budget: this file <= 1 KiB; source <= 1 MiB; dist <= 2 MiB;
+# documentation and evidence <= 2 MiB; total submission < 8 MiB.
+# Required validation evidence: budget <= 2 MiB with documentation.
+!artifacts/
+!artifacts/**
+# Runtime dependencies and caches, at every nesting level.
+**/node_modules/
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/.npm/
+**/.cache/
+**/.playwright-mcp/
+**/*.pyc
+**/*.tsbuildinfo
+**/*.log
+**/*.sqlite3
+**/*.sqlite3-*
+# The production export in dist/ is intentionally included.
